@@ -1,0 +1,54 @@
+plugins {
+  id 'org.jetbrains.kotlin.jvm'
+  id 'org.jetbrains.kotlinx.benchmark'
+}
+
+repositories {
+  mavenCentral()
+}
+
+// TODO: Inherit these from root project
+ext {
+  kotlinVersion = "1.5.31"
+  kotlinxBenchmarkVersion = "0.3.1"
+}
+
+sourceSets {
+  main.kotlin.srcDirs = ['src']
+  test.kotlin.srcDirs = ['test']
+  test.resources.srcDirs = ['test-resources']
+  benchmarks.kotlin.srcDirs = ['benchmarks']
+  benchmarks.resources.srcDirs = ['benchmark-resources']
+}
+
+sourceSets.getByName("benchmarks") {
+  dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:$kotlinxBenchmarkVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime-jvm:$kotlinxBenchmarkVersion")
+  }
+}
+
+dependencies {
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
+
+  testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
+
+  benchmarksCompile sourceSets.main.output + sourceSets.main.runtimeClasspath
+  benchmarksCompile "org.openjdk.jmh:jmh-generator-annprocess:1.21"
+  benchmarksCompile "org.openjdk.jmh:jmh-core:1.21"
+
+  // TODO: Add utility functions for other kotlin libraries
+  //       e.g. json, reflect
+}
+
+
+test {
+  useJUnitPlatform()
+}
+
+benchmark {
+  targets {
+    register("benchmarks")
+  }
+}
