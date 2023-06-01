@@ -1,6 +1,7 @@
 plugins {
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlinx.benchmark'
+  id 'org.jetbrains.kotlin.plugin.serialization'
   id 'maven-publish'
 }
 
@@ -18,8 +19,9 @@ publishing {
 
 // TODO: Inherit these from root project
 ext {
-  kotlinVersion = "1.5.31"
-  kotlinxBenchmarkVersion = "0.3.1"
+  kotlinVersion = "1.8.21"
+  kotlinCoroutinesVersion = "1.7.1"
+  kotlinxBenchmarkVersion = "0.4.8"
 }
 
 sourceSets {
@@ -31,23 +33,24 @@ sourceSets {
   benchmarks.resources.srcDirs = ['benchmark-resources']
 }
 
-sourceSets.getByName("benchmarks") {
+sourceSets.named("benchmarks") {
   dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime:$kotlinxBenchmarkVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-benchmark-runtime-jvm:$kotlinxBenchmarkVersion")
+
+    implementation sourceSets.main.output + sourceSets.main.runtimeClasspath
+    implementation "org.openjdk.jmh:jmh-generator-annprocess:1.21"
+    implementation "org.openjdk.jmh:jmh-core:1.21"
   }
 }
 
 dependencies {
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+  implementation "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
 
   testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
-
-  benchmarksCompile sourceSets.main.output + sourceSets.main.runtimeClasspath
-  benchmarksCompile "org.openjdk.jmh:jmh-generator-annprocess:1.21"
-  benchmarksCompile "org.openjdk.jmh:jmh-core:1.21"
 
   // TODO: Add utility functions for other kotlin libraries
   //       e.g. json, reflect
